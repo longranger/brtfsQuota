@@ -2,6 +2,7 @@
 
 import argparse
 import subprocess
+import re
 
 parser = argparse.ArgumentParser(
     description='Gives quotas from a BTRFS filesystem in a readable form'
@@ -22,10 +23,10 @@ mount_point = sys_args.mount_point
 multiplicator_lookup = ['B', 'K', 'M', 'G', 'T', 'P']
 
 subvolume_data = dict()
-cmd = ["btrfs",  "subvolume", "list", mount_point]
-for line in subprocess.check_output(cmd).splitlines():
-    args = str(line, encoding='utf8').split()
-    subvolume_data[int(args[1])] = args[-1]
+cmd = ["btrfs",  "subvolume", "list", "-t", mount_point]
+for line in subprocess.check_output(cmd).splitlines()[2:]:
+    args = re.split("\t+", str(line, encoding='utf8'))
+    subvolume_data[int(args[0])] = args[3]
 
 print("subvol\t\t\t\t\t\tgroup         total    unshared")
 print("-" * 79)
